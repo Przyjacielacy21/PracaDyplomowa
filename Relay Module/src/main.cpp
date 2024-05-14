@@ -19,6 +19,7 @@ WiFiClient espClient;
 void MQTTConnect();
 const String MQTT_SERVER = "192.168.1.5";
 const String MQTT_Subscribe_Topic = "/home/relynode";
+const String MQTT_Status_Topic = "/home/relynode/status";
 PubSubClient client(espClient);
 void callback(char* topic, byte* message, unsigned int length);
 
@@ -96,28 +97,43 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if(doc.containsKey("r1")){
     int state = doc["r1"];
     if(state == 0 | state == 1){
-      digitalWrite(RELAY1, state);
+      digitalWrite(RELAY1, !state);
     }
   }
 
   if(doc.containsKey("r2")){
     int state = doc["r2"];
     if(state == 0 | state == 1){
-      digitalWrite(RELAY2, state);
+      digitalWrite(RELAY2, !state);
     }
   }
 
   if(doc.containsKey("r3")){
     int state = doc["r3"];
     if(state == 0 | state == 1){
-      digitalWrite(RELAY3, state);
+      digitalWrite(RELAY3, !state);
     }
   }
 
   if(doc.containsKey("r4")){
     int state = doc["r4"];
     if(state == 0 | state == 1){
-      digitalWrite(RELAY4, state);
+      digitalWrite(RELAY4, !state);
+    }
+  }
+
+  if(doc.containsKey("sendStatus")){
+    int state = doc["sendStatus"];
+    if(state){
+      JsonDocument status;
+      status["r1"] = !digitalRead(RELAY1);
+      status["r2"] = !digitalRead(RELAY2);
+      status["r3"] = !digitalRead(RELAY3);
+      status["r4"] = !digitalRead(RELAY4);
+
+      String msg;
+      serializeJson(status, msg);
+      client.publish(MQTT_Status_Topic.c_str(), msg.c_str());
     }
   }
 }
