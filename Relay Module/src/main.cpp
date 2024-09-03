@@ -91,8 +91,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   deserializeJson(doc, messageTemp);
   Serial.println();
-
-  int r1 = 1, r2 = 1, r3 = 1, r4 = 1;
   
   if(doc.containsKey("r1")){
     int state = doc["r1"];

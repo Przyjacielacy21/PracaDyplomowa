@@ -69,15 +69,15 @@ void loop()
     MQTTConnect();
   }
 
-  StaticJsonDocument<120> doc;
+  JsonDocument doc;
   char msg[120];
 
-  //sprawdzenie czy sa dostepne nowe dane
+  
   if (BME680.run()) { 
     float temperature = BME680.temperature;
     float humidity = BME680.humidity;
     float pressure = BME680.pressure / 100.0;
-    float iaq = BME680.iaq;
+    float iaq = BME680.staticIaq;
     float co2 = BME680.co2Equivalent;
 
     doc["t"] = temperature;
@@ -87,12 +87,11 @@ void loop()
     doc["c"] = co2;
 
     serializeJson(doc, msg);
+    client.publish(MQTTTopic.c_str(), msg);
     Serial.println("============================================");
     if (!BME680.iaqAccuracy) Serial.println("Czujnik w trakcie kalibracji poczatkowej!");
     else digitalWrite(BUILTIN_LED, LOW);
     Serial.println(msg);
-    client.publish(MQTTTopic.c_str(), msg);
-
   } else {
     checkIaqSensorStatus();
   }
